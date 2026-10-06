@@ -93,6 +93,8 @@ def main() -> None:
     model.eval()
     args.output.parent.mkdir(parents=True, exist_ok=True)
     dummy = torch.randn(1, 8)
+    # torch>=2.9 defaults to the dynamo exporter, which needs onnxscript.
+    # Keep the TorchScript exporter this script already uses.
     torch.onnx.export(
         model,
         dummy,
@@ -101,6 +103,7 @@ def main() -> None:
         output_names=["logits"],
         dynamic_axes={"features": {0: "batch"}, "logits": {0: "batch"}},
         opset_version=17,
+        dynamo=False,
     )
     print(f"Exported ONNX model to {args.output}")
 
